@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -27,15 +28,15 @@ def interactions():
     command_handler = command_resolver.resolve_command(data["name"])
     command_response = command_handler(data)
 
-    response_data = jsonify({
+    response_data = {
         "type": interaction_response(raw_request["type"]),
         "data": {
             "content": command_response
         },
-    })
+    }
 
-    logger.info(response_data)
-    return response_data
+    logger.info(json.dumps(response_data))
+    return jsonify(response_data)
 
 
 def interaction_response(request_type: int):
