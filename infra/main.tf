@@ -28,6 +28,10 @@ resource "aws_iam_role" "lambda_execution_role" {
       }
     ]
   })
+
+  tags = {
+    GITHUB_REPO_ID = var.github_repo_id
+  }
 }
 
 resource "aws_iam_policy" "lambda_cloudwatch_policy" {
@@ -48,6 +52,10 @@ resource "aws_iam_policy" "lambda_cloudwatch_policy" {
       }
     ]
   })
+
+  tags = {
+    GITHUB_REPO_ID = var.github_repo_id
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_policy_attachment" {
@@ -57,7 +65,7 @@ resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_policy_attachment" 
 
 # ECR Repository
 resource "aws_ecr_repository" "lambda_repository" {
-  name = "lambda-discord-odin-bot-docker-repo"
+  name         = "lambda-discord-odin-bot-docker-repo"
   force_delete = true
 }
 
@@ -76,19 +84,20 @@ resource "null_resource" "push_ecr_image" {
 resource "aws_lambda_function" "lambda_discord_bot" {
   function_name = var.function_name
   role          = aws_iam_role.lambda_execution_role.arn
-  package_type  = "Image"
+  package_type = "Image"
 
   # Use the image_digest instead of the static :latest tag
-  image_uri     = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
+  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
 
   environment {
     variables = {
-      LOG_LEVEL = "info"
+      LOG_LEVEL          = "info",
+      DISCORD_PUBLIC_KEY = aws_ssm_parameter.discord_public_key_parameter.value
     }
   }
 
   tags = {
-    Environment = "dev"
+    GITHUB_REPO_ID = var.github_repo_id
   }
 
   # Ensure Lambda function is recreated when the image changes
@@ -102,7 +111,7 @@ resource "aws_lambda_function" "lambda_discord_bot" {
 # Data Source for Latest ECR Image Digest
 data "aws_ecr_image" "lambda_image" {
   repository_name = aws_ecr_repository.lambda_repository.name
-  image_tag       = "latest"
+  image_tag = "latest"
 
   # Forces update when a new image is pushed
   depends_on = [null_resource.push_ecr_image]
@@ -114,14 +123,14 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   retention_in_days = 30
 
   tags = {
-    Environment = "dev"
+    GITHUB_REPO_ID = var.github_repo_id
   }
 }
 
 # Lambda Function URL
 resource "aws_lambda_function_url" "lambda_function_url" {
-  function_name       = aws_lambda_function.lambda_discord_bot.function_name
-  authorization_type  = "NONE" # Makes the function public to everyone
+  function_name      = aws_lambda_function.lambda_discord_bot.function_name
+  authorization_type = "NONE" # Makes the function public to everyone
 
   cors {
     allow_origins = ["*"]
@@ -131,10 +140,10 @@ resource "aws_lambda_function_url" "lambda_function_url" {
 
 # Allow public access to the Lambda function via the function URL
 resource "aws_lambda_permission" "allow_public_access" {
-  statement_id  = "FunctionURLAllowPublicAccess"
-  action        = "lambda:InvokeFunctionUrl"
-  function_name = aws_lambda_function.lambda_discord_bot.function_name
-  principal     = "*"
+  statement_id           = "FunctionURLAllowPublicAccess"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.lambda_discord_bot.function_name
+  principal              = "*"
   function_url_auth_type = "NONE"
 }
 
@@ -151,9 +160,9 @@ resource "aws_ecr_lifecycle_policy" "latest_image_policy" {
         "rulePriority" = 1
         "description"  = "Keep only the latest image"
         "selection" = {
-          "tagStatus"    = "any"
-          "countType"    = "imageCountMoreThan"
-          "countNumber"  = 1
+          "tagStatus"   = "any"
+          "countType"   = "imageCountMoreThan"
+          "countNumber" = 1
         }
         "action" = {
           "type" = "expire"
@@ -161,4 +170,16 @@ resource "aws_ecr_lifecycle_policy" "latest_image_policy" {
       }
     ]
   })
+}
+
+resource "aws_ssm_parameter" "discord_public_key_parameter" {
+  name        = "/Applications/Discord/OdinBot/DiscordPublicKey"
+  description = "Parameter for a discord application"
+  type        = "String"
+  value       = var.discord_public_key
+  overwrite   = true
+
+  tags = {
+    GITHUB_REPO_ID = var.github_repo_id
+  }
 }
