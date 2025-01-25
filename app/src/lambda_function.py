@@ -1,9 +1,14 @@
 import logging
 import os
+from typing import Callable, Dict
+
 from flask import Flask, jsonify, request
 from mangum import Mangum
 from asgiref.wsgi import WsgiToAsgi
-from discord_interactions import verify_key_decorator
+from discord_interactions import verify_key_decorator, InteractionType
+
+from command.echo_command_handler import EchoCommandHandler
+from command.hello_command_handler import HelloCommandHandler
 
 DISCORD_PUBLIC_KEY = os.getenv("DISCORD_PUBLIC_KEY")
 
@@ -22,25 +27,46 @@ def interactions():
     return interact(raw_request)
 
 
+def interaction_response(request_body: dict):
+    response = {
+        "1": InteractionType.PING,
+        "2": InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE,
+        "4": InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE
+    }
+
+    return response[str(request_body["type"])]
+
+
+def resolve_command(command_name: str) -> Callable[[Dict], str]:
+    handlers = {
+        "hello": HelloCommandHandler(),
+        "echo": EchoCommandHandler()
+    }
+
+    command_handler = handlers.get(command_name)
+    if not command_handler:
+        raise ValueError(f"Command '{command_name}' not found.")
+
+    return command_handler.execute
+
+
+
 @verify_key_decorator(DISCORD_PUBLIC_KEY)
 def interact(raw_request):
-    if raw_request["type"] == 1:  # Ping interaction from Discord
-        response_data = {"type": 1}
-    else:
-        data = raw_request["data"]
-        command_name = data["name"]
+    data = raw_request["data"]
+    command_name = data["name"]
 
-        if command_name == "hello":
-            message_content = "Hello there!"
-        elif command_name == "echo":
-            original_message = data["options"][0]["value"]
-            message_content = f"Echoing: {original_message}"
+    command_func = resolve_command(command_name)
+    command_response = command_func(data)
 
-        response_data = {
-            "type": 4,
-            "data": {"content": message_content},
-        }
+    response_data = {
+        "type": interaction_response(raw_request),
+        "data": {
+            "content": command_response
+        },
+    }
 
+    logger.info(response_data)
     return jsonify(response_data)
 
 
