@@ -1,14 +1,11 @@
 import logging
 import os
-from typing import Callable, Dict
 
 from flask import Flask, jsonify, request
 from mangum import Mangum
 from asgiref.wsgi import WsgiToAsgi
-from discord_interactions import verify_key_decorator, InteractionType
-
-from src.command.echo_command_handler import EchoCommandHandler
-from src.command.hello_command_handler import HelloCommandHandler
+from discord_interactions import verify_key_decorator, InteractionType, InteractionResponseType
+from src.command.command_resolver import CommandResolver
 
 DISCORD_PUBLIC_KEY = os.getenv("DISCORD_PUBLIC_KEY")
 
@@ -20,55 +17,32 @@ asgi_app = WsgiToAsgi(app)
 handler = Mangum(asgi_app, lifespan="off")
 
 
+@verify_key_decorator(DISCORD_PUBLIC_KEY)
 @app.route("/", methods=["POST"])
 def interactions():
     raw_request = request.json
-    logger.info(raw_request)
-    return interact(raw_request)
-
-
-def interaction_response(request_body: dict):
-    response = {
-        "1": InteractionType.PING,
-        "2": InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE,
-        "4": InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE
-    }
-
-    return response[str(request_body["type"])]
-
-
-def resolve_command(command_name: str) -> Callable[[Dict], str]:
-    handlers = {
-        "hello": HelloCommandHandler(),
-        "echo": EchoCommandHandler()
-    }
-
-    command_handler = handlers.get(command_name)
-    if not command_handler:
-        raise ValueError(f"Command '{command_name}' not found.")
-
-    return command_handler.execute
-
-
-
-@verify_key_decorator(DISCORD_PUBLIC_KEY)
-def interact(raw_request):
     data = raw_request["data"]
-    command_name = data["name"]
 
-    command_func = resolve_command(command_name)
-    command_response = command_func(data)
+    command_resolver = CommandResolver()
+    command_handler = command_resolver.resolve_command(data["name"])
+    command_response = command_handler(data)
 
-    response_data = {
-        "type": interaction_response(raw_request),
+    response_data = jsonify({
+        "type": interaction_response(raw_request["type"]),
         "data": {
             "content": command_response
         },
-    }
+    })
 
     logger.info(response_data)
-    return jsonify(response_data)
+    return response_data
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+def interaction_response(request_type: int):
+    response = {
+        f"{InteractionType.PING}": InteractionResponseType.PONG,
+        f"{InteractionType.APPLICATION_COMMAND}": InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        f"{InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE}": InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE
+    }
+
+    return response[str(request_type)]

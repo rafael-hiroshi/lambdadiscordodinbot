@@ -1,7 +1,7 @@
-from src.command.abstract_command import Command
+from src.command.command_handler import CommandHandler
 
 
-class HelloCommandHandler(Command):
+class HelloCommandHandler(CommandHandler):
 
     def execute(self, request_data: dict) -> str:
         return "Hello there!"

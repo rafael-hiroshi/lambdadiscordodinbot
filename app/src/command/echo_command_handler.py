@@ -1,7 +1,7 @@
-from src.command.abstract_command import Command
+from src.command.command_handler import CommandHandler
 
 
-class EchoCommandHandler(Command):
+class EchoCommandHandler(CommandHandler):
 
     def execute(self, request_data: dict) -> str:
         original_message = request_data["options"][0]["value"]
