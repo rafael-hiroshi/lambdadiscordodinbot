@@ -1,4 +1,4 @@
-from command.abstract_command import Command
+from src.command.abstract_command import Command
 
 
 class EchoCommandHandler(Command):

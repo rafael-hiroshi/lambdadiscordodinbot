@@ -7,8 +7,8 @@ from mangum import Mangum
 from asgiref.wsgi import WsgiToAsgi
 from discord_interactions import verify_key_decorator, InteractionType
 
-from command.echo_command_handler import EchoCommandHandler
-from command.hello_command_handler import HelloCommandHandler
+from src.command.echo_command_handler import EchoCommandHandler
+from src.command.hello_command_handler import HelloCommandHandler
 
 DISCORD_PUBLIC_KEY = os.getenv("DISCORD_PUBLIC_KEY")
 
