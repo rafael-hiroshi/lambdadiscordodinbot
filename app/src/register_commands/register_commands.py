@@ -1,15 +1,12 @@
 import json
 import os
-
 import requests
 
-# Constants
 DISCORD_API_BASE = "https://discord.com/api/v9"
-BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")  # Replace with your bot token
-APPLICATION_ID = os.getenv("APPLICATION_ID")  # Replace with your application ID
+BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+APPLICATION_ID = os.getenv("APPLICATION_ID")
 
 
-# Read commands from JSON file
 def load_commands(file_path):
     try:
         with open(file_path, "r") as file:
@@ -19,7 +16,6 @@ def load_commands(file_path):
         return []
 
 
-# Register a command with Discord
 def register_command(command_data):
     url = f"{DISCORD_API_BASE}/applications/{APPLICATION_ID}/commands"
     headers = {
@@ -33,7 +29,6 @@ def register_command(command_data):
         print(f"Failed to register command '{command_data['name']}'. Status Code: {response.status_code}. Response: {response.text}")
 
 
-# Main function
 def main():
     commands = load_commands("discord_commands.json")
     if not commands:
