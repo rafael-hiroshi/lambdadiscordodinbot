@@ -7,8 +7,8 @@ class CommandResolver:
 
     def __init__(self):
         self.__handlers = {
-            "hello": HelloCommandHandler(),
-            "echo": EchoCommandHandler()
+            "hello": HelloCommandHandler,
+            "echo": EchoCommandHandler
         }
 
     def resolve_command(self, command_name: str) -> Callable[[Dict], str]:
@@ -17,4 +17,4 @@ class CommandResolver:
         if not command_handler:
             raise ValueError(f"Command '{command_name}' not found.")
 
-        return command_handler.execute
+        return command_handler().execute
