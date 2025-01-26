@@ -8,7 +8,7 @@ terraform {
 
   backend "s3" {
     bucket = "tfstate-758724857051"
-    key    = "dev/resources/valheimserver.tfstate"
+    key    = "lambdadiscordodinbot.tfstate"
     region = "sa-east-1"
   }
 }
