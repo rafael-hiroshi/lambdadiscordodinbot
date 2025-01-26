@@ -92,7 +92,7 @@ resource "aws_lambda_function" "lambda_discord_bot" {
   environment {
     variables = {
       LOG_LEVEL          = "info",
-      DISCORD_PUBLIC_KEY = aws_ssm_parameter.discord_public_key_parameter.value
+      DISCORD_PUBLIC_KEY = data.aws_ssm_parameter.discord_public_key.value
     }
   }
 
@@ -170,16 +170,4 @@ resource "aws_ecr_lifecycle_policy" "latest_image_policy" {
       }
     ]
   })
-}
-
-resource "aws_ssm_parameter" "discord_public_key_parameter" {
-  name        = "/Applications/Discord/OdinBot/DiscordPublicKey"
-  description = "Parameter for a discord application"
-  type        = "String"
-  value       = var.discord_public_key
-  overwrite   = true
-
-  tags = {
-    GITHUB_REPO_ID = var.github_repo_id
-  }
 }
