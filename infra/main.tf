@@ -33,9 +33,9 @@ resource "aws_iam_role" "lambda_execution_role" {
   }
 }
 
-resource "aws_iam_policy" "lambda_cloudwatch_policy" {
-  name        = "lambda_cloudwatch_policy"
-  description = "IAM policy for Lambda to write logs to CloudWatch"
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "lambda_policy"
+  description = "IAM policy for Lambda execution"
   path        = "/iamsr/"
   policy = jsonencode({
     Version = "2012-10-17",
@@ -48,6 +48,14 @@ resource "aws_iam_policy" "lambda_cloudwatch_policy" {
           "logs:PutLogEvents"
         ],
         Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ecs:DescribeServices",
+          "ecs:UpdateService"
+        ],
+        Resource = "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:service/ValheimDedicatedServerCluster/ValheimService"
       }
     ]
   })
@@ -57,9 +65,10 @@ resource "aws_iam_policy" "lambda_cloudwatch_policy" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_policy_attachment" {
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.lambda_cloudwatch_policy.arn
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 resource "aws_ecr_repository" "lambda_repository" {
