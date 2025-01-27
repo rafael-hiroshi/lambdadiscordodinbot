@@ -13,7 +13,6 @@ terraform {
   }
 }
 
-# IAM Role for Lambda
 resource "aws_iam_role" "lambda_execution_role" {
   name = "LambdaDiscordOdinBotRole"
   assume_role_policy = jsonencode({
@@ -63,7 +62,6 @@ resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_policy_attachment" 
   policy_arn = aws_iam_policy.lambda_cloudwatch_policy.arn
 }
 
-# ECR Repository
 resource "aws_ecr_repository" "lambda_repository" {
   name         = "lambda-discord-odin-bot-docker-repo"
   force_delete = true
@@ -80,19 +78,18 @@ resource "null_resource" "push_ecr_image" {
   }
 }
 
-# Lambda Function
 resource "aws_lambda_function" "lambda_discord_bot" {
   function_name = var.function_name
   role          = aws_iam_role.lambda_execution_role.arn
   package_type = "Image"
-
-  # Use the image_digest instead of the static :latest tag
   image_uri = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
 
   environment {
     variables = {
       LOG_LEVEL          = "info",
-      DISCORD_PUBLIC_KEY = data.aws_ssm_parameter.discord_public_key.value
+      DISCORD_PUBLIC_KEY = data.aws_ssm_parameter.discord_public_key.value,
+      VALHEIM_SERVER_ECS_CLUSTER = "ValheimDedicatedServerCluster"
+      VALHEIM_SERVER_ECS_SERVICE = "ValheimService",
     }
   }
 
@@ -117,7 +114,6 @@ data "aws_ecr_image" "lambda_image" {
   depends_on = [null_resource.push_ecr_image]
 }
 
-# CloudWatch Log Group for Lambda Function
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = 30
@@ -127,14 +123,13 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   }
 }
 
-# Lambda Function URL
 resource "aws_lambda_function_url" "lambda_function_url" {
   function_name      = aws_lambda_function.lambda_discord_bot.function_name
-  authorization_type = "NONE" # Makes the function public to everyone
+  authorization_type = "NONE"
 
   cors {
     allow_origins = ["*"]
-    allow_methods = ["POST", "GET"] # Should be a list of valid methods
+    allow_methods = ["POST"]
   }
 }
 

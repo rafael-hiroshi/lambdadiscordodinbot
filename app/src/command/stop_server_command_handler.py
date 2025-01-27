@@ -15,7 +15,7 @@ class StopServerCommandHandler(CommandHandler):
 
     def execute(self, request_data: dict) -> str:
         cluster_name = os.getenv("VALHEIM_SERVER_ECS_CLUSTER")
-        service_name = os.getenv("VALHEIM_ECS_SERVICE")
+        service_name = os.getenv("VALHEIM_SERVER_ECS_SERVICE")
 
         try:
             response = self.__ecs_client.describe_services(cluster=cluster_name, services=[service_name])

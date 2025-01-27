@@ -6,7 +6,7 @@ from src.command.stop_server_command_handler import StopServerCommandHandler
 
 class TestStopServerCommandHandler(unittest.TestCase):
 
-    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_ECS_SERVICE": "TestService"})
+    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
     def test_stop_server_with_running_tasks(self, mock_boto_client):
         mock_ecs_client = MagicMock()
@@ -26,7 +26,7 @@ class TestStopServerCommandHandler(unittest.TestCase):
         )
         self.assertEqual(response, "Server is being stopped. Tasks will be terminated shortly.")
 
-    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_ECS_SERVICE": "TestService"})
+    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
     def test_stop_server_with_no_running_tasks(self, mock_boto_client):
         mock_ecs_client = MagicMock()
@@ -41,7 +41,7 @@ class TestStopServerCommandHandler(unittest.TestCase):
         mock_ecs_client.update_service.assert_not_called()
         self.assertEqual(response, "Server is not online. No action taken.")
 
-    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_ECS_SERVICE": "TestService"})
+    @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
     def test_service_not_available(self, mock_boto_client):
         mock_ecs_client = MagicMock()
