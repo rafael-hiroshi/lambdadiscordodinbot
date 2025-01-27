@@ -2,10 +2,11 @@ import json
 import logging
 import os
 
-from flask import Flask, jsonify, request
-from mangum import Mangum
 from asgiref.wsgi import WsgiToAsgi
 from discord_interactions import verify_key_decorator, InteractionType, InteractionResponseType
+from flask import Flask, jsonify, request
+from mangum import Mangum
+
 from src.command.command_resolver import CommandResolver
 
 DISCORD_PUBLIC_KEY = os.getenv("DISCORD_PUBLIC_KEY")
@@ -23,10 +24,8 @@ handler = Mangum(asgi_app, lifespan="off")
 def interactions():
     raw_request = request.json
     data = raw_request["data"]
-
-    command_resolver = CommandResolver()
-    command_handler = command_resolver.resolve_command(data["name"])
-    command_response = command_handler(data)
+    command_handler = CommandResolver().resolve_command(data["name"])
+    command_response = command_handler.execute(data)
 
     response_data = {
         "type": interaction_response(raw_request["type"]),
