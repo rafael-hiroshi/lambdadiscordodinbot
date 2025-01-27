@@ -1,18 +1,10 @@
 [
   {
-    "name": "hello",
-    "description": "say hello!"
+    "name": "start-server",
+    "description": "Launches your Valheim server and gets it ready to play!"
   },
   {
-    "name": "echo",
-    "description": "Echo message back to sender",
-    "options": [
-      {
-        "name": "message",
-        "description": "Message to echo back",
-        "type": 3,
-        "required": true
-      }
-    ]
+    "name": "stop-server",
+    "description": "Stops your Valheim server and shuts it down safely."
   }
 ]

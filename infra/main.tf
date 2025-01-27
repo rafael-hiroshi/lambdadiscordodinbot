@@ -90,13 +90,14 @@ resource "null_resource" "push_ecr_image" {
 resource "aws_lambda_function" "lambda_discord_bot" {
   function_name = var.function_name
   role          = aws_iam_role.lambda_execution_role.arn
-  package_type = "Image"
-  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
+  package_type  = "Image"
+  timeout       = 6
+  image_uri     = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
 
   environment {
     variables = {
-      LOG_LEVEL          = "info",
-      DISCORD_PUBLIC_KEY = data.aws_ssm_parameter.discord_public_key.value,
+      LOG_LEVEL                  = "info",
+      DISCORD_PUBLIC_KEY         = data.aws_ssm_parameter.discord_public_key.value,
       VALHEIM_SERVER_ECS_CLUSTER = var.valheim_server_ecs_cluster_name,
       VALHEIM_SERVER_ECS_SERVICE = var.valheim_server_ecs_service_name
     }
