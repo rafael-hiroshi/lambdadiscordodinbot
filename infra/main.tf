@@ -55,7 +55,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "ecs:DescribeServices",
           "ecs:UpdateService"
         ],
-        Resource = "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:service/ValheimDedicatedServerCluster/ValheimService"
+        Resource = "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:service/${var.valheim_server_ecs_cluster_name}/${var.valheim_server_ecs_service_name}"
       }
     ]
   })
@@ -97,8 +97,8 @@ resource "aws_lambda_function" "lambda_discord_bot" {
     variables = {
       LOG_LEVEL          = "info",
       DISCORD_PUBLIC_KEY = data.aws_ssm_parameter.discord_public_key.value,
-      VALHEIM_SERVER_ECS_CLUSTER = "ValheimDedicatedServerCluster"
-      VALHEIM_SERVER_ECS_SERVICE = "ValheimService",
+      VALHEIM_SERVER_ECS_CLUSTER = var.valheim_server_ecs_cluster_name,
+      VALHEIM_SERVER_ECS_SERVICE = var.valheim_server_ecs_service_name
     }
   }
 
