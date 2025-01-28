@@ -25,7 +25,7 @@ class TestStartServerCommandHandler(unittest.TestCase):
             desiredCount=1,
             forceNewDeployment=True,
         )
-        self.assertEqual(response, "Server is about to launch in a few minutes. Hang tight while we get everything set up!")
+        self.assertEqual(response, "Server is about to launch in a few minutes. ⏳")
 
     @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
@@ -40,7 +40,7 @@ class TestStartServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs.update_service.assert_not_called()
-        self.assertEqual(response, "Server is already running. No action taken.")
+        self.assertEqual(response, "Server is already running. No action taken. ✅")
 
     @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
@@ -53,7 +53,7 @@ class TestStartServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs.update_service.assert_not_called()
-        self.assertEqual(response, "An error occurred while starting the server. Service is not available.")
+        self.assertEqual(response, "An error occurred while starting the server. Service is not available. ⚠️")
 
     @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
@@ -66,4 +66,4 @@ class TestStartServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs.update_service.assert_not_called()
-        self.assertEqual(response, "An error occurred while starting the server. Please check the logs for more details.")
+        self.assertEqual(response, "An error occurred while starting the server. Please check the logs for more details. ❗")

@@ -24,7 +24,7 @@ class TestStopServerCommandHandler(unittest.TestCase):
             desiredCount=0,
             forceNewDeployment=False,
         )
-        self.assertEqual(response, "Server is being stopped. Tasks will be terminated shortly.")
+        self.assertEqual(response, "Server is being stopped. Tasks will be terminated shortly. 🛑")
 
     @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
@@ -39,7 +39,7 @@ class TestStopServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs_client.update_service.assert_not_called()
-        self.assertEqual(response, "Server is not online. No action taken.")
+        self.assertEqual(response, "Server is not online. No action taken. 💤")
 
     @patch.dict(os.environ, {"VALHEIM_SERVER_ECS_CLUSTER": "TestCluster", "VALHEIM_SERVER_ECS_SERVICE": "TestService"})
     @patch("boto3.client")
@@ -52,7 +52,7 @@ class TestStopServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs_client.update_service.assert_not_called()
-        self.assertEqual(response, "An error occurred while stopping the server. Service is not available.")
+        self.assertEqual(response, "An error occurred while stopping the server. Service is not available. ⚠️")
 
     @patch("boto3.client")
     def test_stop_server_with_exception(self, mock_boto_client):
@@ -64,4 +64,4 @@ class TestStopServerCommandHandler(unittest.TestCase):
         response = handler.execute({})
 
         mock_ecs_client.update_service.assert_not_called()
-        self.assertEqual(response, "An error occurred while stopping the server. Please check the logs for more details.")
+        self.assertEqual(response, "An error occurred while stopping the server. Please check the logs for more details. ❗")

@@ -23,13 +23,13 @@ class StartServerCommandHandler(CommandHandler):
             services = response.get("services", [])
 
             if not services:
-                return "An error occurred while starting the server. Service is not available."
+                return "An error occurred while starting the server. Service is not available. ⚠️"
 
             service = services[0]
             running_count = service.get("runningCount", 0)
 
             if running_count > 0:
-                return "Server is already running. No action taken."
+                return "Server is already running. No action taken. ✅"
 
             self.__ecs_client.update_service(
                 cluster=cluster_name,
@@ -38,7 +38,7 @@ class StartServerCommandHandler(CommandHandler):
                 forceNewDeployment=True,
             )
 
-            return "Server is about to launch in a few minutes. Hang tight while we get everything set up!"
+            return "Server is about to launch in a few minutes. ⏳"
         except Exception as e:
             logger.error(str(e))
-            return "An error occurred while starting the server. Please check the logs for more details."
+            return "An error occurred while starting the server. Please check the logs for more details. ❗"

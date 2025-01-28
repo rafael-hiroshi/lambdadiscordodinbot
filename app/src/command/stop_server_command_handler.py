@@ -22,13 +22,13 @@ class StopServerCommandHandler(CommandHandler):
             services = response.get("services", [])
 
             if not services:
-                return f"An error occurred while stopping the server. Service is not available."
+                return f"An error occurred while stopping the server. Service is not available. ⚠️"
 
             service = services[0]
             running_count = service.get("runningCount", 0)
 
             if running_count == 0:
-                return f"Server is not online. No action taken."
+                return f"Server is not online. No action taken. 💤"
 
             self.__ecs_client.update_service(
                 cluster=cluster_name,
@@ -37,7 +37,7 @@ class StopServerCommandHandler(CommandHandler):
                 forceNewDeployment=False,
             )
 
-            return "Server is being stopped. Tasks will be terminated shortly."
+            return "Server is being stopped. Tasks will be terminated shortly. 🛑"
         except Exception as e:
             logger.error(f"Error while stopping the server: {str(e)}")
-            return "An error occurred while stopping the server. Please check the logs for more details."
+            return "An error occurred while stopping the server. Please check the logs for more details. ❗"
