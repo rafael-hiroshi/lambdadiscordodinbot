@@ -91,7 +91,7 @@ resource "aws_lambda_function" "lambda_discord_bot" {
   function_name = var.function_name
   role          = aws_iam_role.lambda_execution_role.arn
   package_type  = "Image"
-  timeout       = 6
+  timeout       = 30
   image_uri     = "${aws_ecr_repository.lambda_repository.repository_url}@${data.aws_ecr_image.lambda_image.image_digest}"
 
   environment {
