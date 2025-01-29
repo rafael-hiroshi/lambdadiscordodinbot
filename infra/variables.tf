@@ -17,3 +17,8 @@ variable "valheim_server_ecs_service_name" {
   type    = string
   default = "ValheimService"
 }
+
+variable "valheim_container_ecs_name" {
+  type    = string
+  default = "ValheimServer"
+}

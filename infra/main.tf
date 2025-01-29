@@ -53,9 +53,26 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow",
         Action = [
           "ecs:DescribeServices",
-          "ecs:UpdateService"
+          "ecs:UpdateService",
+          "ecs:ExecuteCommand",
+          "ecs:ListTasks"
         ],
-        Resource = "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:service/${var.valheim_server_ecs_cluster_name}/${var.valheim_server_ecs_service_name}"
+        Resource = [
+          "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:service/${var.valheim_server_ecs_cluster_name}/*",
+          "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:container-instance/${var.valheim_server_ecs_cluster_name}/*",
+          "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:cluster/${var.valheim_server_ecs_cluster_name}",
+          "arn:aws:ecs:sa-east-1:${data.aws_caller_identity.current.account_id}:task/${var.valheim_server_ecs_cluster_name}/*",
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ],
+        "Resource" : "*"
       }
     ]
   })
@@ -99,7 +116,8 @@ resource "aws_lambda_function" "lambda_discord_bot" {
       LOG_LEVEL                  = "info",
       DISCORD_PUBLIC_KEY         = data.aws_ssm_parameter.discord_public_key.value,
       VALHEIM_SERVER_ECS_CLUSTER = var.valheim_server_ecs_cluster_name,
-      VALHEIM_SERVER_ECS_SERVICE = var.valheim_server_ecs_service_name
+      VALHEIM_SERVER_ECS_SERVICE = var.valheim_server_ecs_service_name,
+      VALHEIM_CONTAINER_NAME     = var.valheim_container_ecs_name
     }
   }
 

@@ -6,5 +6,9 @@
   {
     "name": "stop-server",
     "description": "Stops your Valheim server and shuts it down safely."
+  },
+  {
+    "name": "save-world",
+    "description": "Creates a backup of your Valheim server world to ensure your progress is safe."
   }
 ]

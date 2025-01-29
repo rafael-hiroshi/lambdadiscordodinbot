@@ -1,6 +1,7 @@
 from src.command.command_handler import CommandHandler
 from src.command.echo_command_handler import EchoCommandHandler
 from src.command.hello_command_handler import HelloCommandHandler
+from src.command.save_world_command_handler import SaveWorldCommandHandler
 from src.command.start_server_command_handler import StartServerCommandHandler
 from src.command.stop_server_command_handler import StopServerCommandHandler
 
@@ -13,6 +14,7 @@ class CommandResolver:
             "echo": EchoCommandHandler,
             "start-server": StartServerCommandHandler,
             "stop-server": StopServerCommandHandler,
+            "save-world": SaveWorldCommandHandler
         }
 
     def resolve_command(self, command_name: str) -> CommandHandler:
