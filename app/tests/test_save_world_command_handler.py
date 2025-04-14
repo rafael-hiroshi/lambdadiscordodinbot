@@ -10,7 +10,7 @@ class TestSaveWorldCommandHandler(unittest.TestCase):
     @patch("boto3.client")
     def test_save_world_no_running_tasks(self, mock_boto_client):
         os.environ["VALHEIM_SERVER_ECS_CLUSTER"] = "test-cluster"
-        os.environ["VALHEIM_ECS_SERVICE"] = "test-service"
+        os.environ["VALHEIM_SERVER_ECS_SERVICE"] = "test-service"
         os.environ["VALHEIM_CONTAINER_NAME"] = "test-container"
 
         mock_ecs_client = MagicMock()
@@ -28,7 +28,7 @@ class TestSaveWorldCommandHandler(unittest.TestCase):
     @patch("boto3.client")
     def test_save_world_command_executed_successfully(self, mock_boto_client):
         os.environ["VALHEIM_SERVER_ECS_CLUSTER"] = "test-cluster"
-        os.environ["VALHEIM_ECS_SERVICE"] = "test-service"
+        os.environ["VALHEIM_SERVER_ECS_SERVICE"] = "test-service"
         os.environ["VALHEIM_CONTAINER_NAME"] = "test-container"
 
         mock_ecs_client = MagicMock()
@@ -52,7 +52,7 @@ class TestSaveWorldCommandHandler(unittest.TestCase):
             cluster="test-cluster",
             task="task-arn-1",
             container="test-container",
-            interactive=False,
+            interactive=True,
             command="supervisorctl restart valheim-backup",
         )
         assert response == "World save process has been initiated. 💾"
@@ -60,7 +60,7 @@ class TestSaveWorldCommandHandler(unittest.TestCase):
     @patch("boto3.client")
     def test_save_world_error(self, mock_boto_client):
         os.environ["VALHEIM_SERVER_ECS_CLUSTER"] = "test-cluster"
-        os.environ["VALHEIM_ECS_SERVICE"] = "test-service"
+        os.environ["VALHEIM_SERVER_ECS_SERVICE"] = "test-service"
         os.environ["VALHEIM_CONTAINER_NAME"] = "test-container"
 
         mock_ecs_client = MagicMock()
